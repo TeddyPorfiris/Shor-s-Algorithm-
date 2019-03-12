@@ -1,0 +1,74 @@
+import random, itertools
+
+# Sieve of Eratosthenes algorithm
+def sieve( ):
+    D = {  }
+    yield 2
+    for q in itertools.islice(itertools.count(3), 0, None, 2):
+        p = D.pop(q, None)
+        if p is None:
+            D[q*q] = q
+            yield q
+        else:
+            x = p + q
+            while x in D or not (x&1):
+                x += p
+            D[x] = p
+
+# Creates a list of prime numbers up to the given argument
+def get_primes_sieve(n):
+    return list(itertools.takewhile(lambda p: p<n, sieve()))
+
+def get_semiprime(n):
+    primes = get_primes_sieve(n)
+    l = len(primes)
+    p = primes[random.randrange(l)]
+    q = primes[random.randrange(l)]
+    return p*q
+
+N = get_semiprime(1000)
+
+print("semiprime N =",N)
+
+
+# Brute force period finding algorithm
+def find_period_classical(x, N):
+    n = 1
+    t = x
+    while t != 1:
+        t *= x
+        t %= N
+        n += 1
+    return n
+
+
+
+import math
+
+def shors_algorithm_classical(N):
+    x = random.randint(0,N) # step one
+    if(math.gcd(x,N) != 1): # step two
+        return x,0,math.gcd(x,N),N/math.gcd(x,N)
+    r = find_period_classical(x,N) # step three
+    while(r % 2 != 0):
+        r = find_period_classical(x,N)
+    p = math.gcd(x**int(r/2)+1,N) # step four, ignoring the case where (x^(r/2) +/- 1) is a multiple of N
+    q = math.gcd(x**int(r/2)-1,N)
+    return x,r,p,q
+
+x,r,p,q = shors_algorithm_classical(N)
+print("semiprime N = ",N,", coprime x = ",x,", period r = ",r,", prime factors = ",p," and ",q,sep="")
+
+
+#-------------------QFT TRANSFORM-------------------
+
+q3 = QuantumRegister(3, 'q3')
+c3 = ClassicalRegister(3, 'c3')
+
+qft3 = QuantumCircuit(q3, c3)
+qft3.h(q[0])
+qft3.cu1(math.pi/2.0, q3[1], q3[0])
+qft3.h(q[1])
+qft3.cu1(math.pi/4.0, q3[2], q3[0])
+qft3.cu1(math.pi/2.0, q3[2], q3[1])
+qft3.h(q[2])
